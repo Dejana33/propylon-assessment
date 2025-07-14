@@ -11,10 +11,26 @@ file_versions = [
 class Command(BaseCommand):
     help = "Load test file fixtures"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--email',
+            type=str,
+            default='user1@example.com',
+            help='Email of the user for whom fixture files are created.'
+        )
+        parser.add_argument(
+            '--password',
+            type=str,
+            default='user123',
+            help='Password of the user for whom fixture files are created.'
+        )
+
     def handle(self, *args, **options):
-        user, created = User.objects.get_or_create(email="user1@example.com")
+        email = options['email']
+        password = options['password']
+        user, created = User.objects.get_or_create(email=email)
         if created:
-            user.set_password("user123")
+            user.set_password(password)
             user.save()
         for file_name in file_versions:
             file_obj, _ = File.objects.get_or_create(name=file_name, user=user)
