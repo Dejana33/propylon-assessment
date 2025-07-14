@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from rest_framework.reverse import reverse
 
-from ..models import FileVersion, File
+from propylon_document_manager.file_versions.models.file_version import FileVersion
+from propylon_document_manager.file_versions.models.file import File
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:

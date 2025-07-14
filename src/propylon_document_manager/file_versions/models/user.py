@@ -1,11 +1,9 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models import CharField, EmailField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager
-from django.conf import settings
-import hashlib
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -62,32 +60,4 @@ class User(AbstractUser):
             str: URL for user detail.
 
         """
-        return reverse("users:detail", kwargs={"pk": self.id})
-
-
-class File(models.Model):
-    name = models.CharField(max_length=512)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="files"
-    )
-
-    def __str__(self):
-        return self.name
-
-
-class FileVersion(models.Model):
-    file_obj = models.ForeignKey(
-        "File",
-        on_delete=models.CASCADE,
-        related_name="versions"
-    )
-    version_number = models.IntegerField()
-    file = models.FileField(upload_to="uploads/", null=True, blank=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="file_versions"
-    )
-    content_hash = models.CharField(max_length=64, editable=False, db_index=True)
+        return reverse("users:detail", kwargs={"pk": self.id}) 

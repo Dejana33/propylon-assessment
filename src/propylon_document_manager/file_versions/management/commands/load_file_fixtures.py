@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
-from propylon_document_manager.file_versions.models import FileVersion, User, File
+from propylon_document_manager.file_versions.models.file_version import FileVersion
+from propylon_document_manager.file_versions.models.user import User
+from propylon_document_manager.file_versions.models.file import File
 
 file_versions = [
     'bill_document',

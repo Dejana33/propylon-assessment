@@ -1,7 +1,9 @@
 import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
-from propylon_document_manager.file_versions.models import User, FileVersion, File
+from propylon_document_manager.file_versions.models.user import User
+from propylon_document_manager.file_versions.models.file_version import FileVersion
+from propylon_document_manager.file_versions.models.file import File
 
 @pytest.mark.django_db
 def test_upload_and_versioning(tmp_path):

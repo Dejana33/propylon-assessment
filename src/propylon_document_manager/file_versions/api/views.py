@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.views import APIView
 
-from ..models import FileVersion, File
+from propylon_document_manager.file_versions.models.file_version import FileVersion
+from propylon_document_manager.file_versions.models.file import File
 from .serializers import FileVersionSerializer
 import hashlib
 

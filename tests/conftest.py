@@ -1,6 +1,6 @@
 import pytest
 
-from propylon_document_manager.file_versions.models import User
+from propylon_document_manager.file_versions.models.user import User
 from .factories import UserFactory
 
 @pytest.fixture(autouse=True)
