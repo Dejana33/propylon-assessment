@@ -16,7 +16,7 @@ class FileVersion(models.Model):
         on_delete=models.CASCADE,
         related_name="file_versions"
     )
-    content_hash = models.CharField(max_length=64, editable=False, db_index=True, unique=True)
+    content_hash = models.CharField(max_length=64, editable=False, db_index=True)
 
     class Meta:
         unique_together = ['file_obj', 'version_number'] 

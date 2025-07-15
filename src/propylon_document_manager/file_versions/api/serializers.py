@@ -29,13 +29,15 @@ class FileVersionSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and request.method == 'POST':
             file_name = request.data.get('file_name')
-            if not file_name:
-                raise serializers.ValidationError({"file_name": "File name is required."})
-            if len(file_name) > 255:
-                raise serializers.ValidationError({"file_name": "File name must be at most 255 characters."})
-            if '/' in file_name or '\\' in file_name:
-                raise serializers.ValidationError({"file_name": "File name cannot contain '/' or '\\'."})
             uploaded_file = request.FILES.get('file')
+            if not file_name and uploaded_file:
+                file_name = uploaded_file.name
+            if file_name:
+                if len(file_name) > 255:
+                    raise serializers.ValidationError({"file_name": "File name must be at most 255 characters."})
+                if '/' in file_name or '\\' in file_name:
+                    raise serializers.ValidationError({"file_name": "File name cannot contain '/' or '\\'."})
+            # File size validation
             if uploaded_file:
                 max_size = 10 * 1024 * 1024
                 if uploaded_file.size > max_size:

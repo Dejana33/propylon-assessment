@@ -33,7 +33,11 @@ class FileVersionViewSet(
     def perform_create(self, serializer):
         file_name = self.request.data.get("file_name")
         if not file_name:
-            raise serializers.ValidationError({"file_name": "This field is required."})
+            uploaded_file = self.request.FILES.get("file")
+            if uploaded_file:
+                file_name = uploaded_file.name
+            else:
+                raise serializers.ValidationError({"file_name": "File name is required if file is missing."})
         
         if "file" not in self.request.FILES:
             raise serializers.ValidationError({"file": "This field is required."})
@@ -49,22 +53,28 @@ class FileVersionViewSet(
             sha256.update(chunk)
         content_hash = sha256.hexdigest()
 
-        existing_version = FileVersion.objects.filter(content_hash=content_hash).first()
+        existing_version = FileVersion.objects.filter(
+            file_obj=file_obj,
+            user=self.request.user,
+            content_hash=content_hash
+        ).first()
         if existing_version:
-            latest_version = FileVersion.objects.filter(file_obj=file_obj).order_by("-version_number").first()
-            next_version = 1 if not latest_version else latest_version.version_number + 1
-            
+            serializer = self.get_serializer(existing_version, context={"request": self.request})
+            raise serializers.ValidationError(serializer.data)
+
+        latest_version = FileVersion.objects.filter(file_obj=file_obj).order_by("-version_number").first()
+        next_version = 1 if not latest_version else latest_version.version_number + 1
+
+        existing_file_version = FileVersion.objects.filter(content_hash=content_hash).first()
+        if existing_file_version:
             serializer.save(
                 user=self.request.user,
                 file_obj=file_obj,
                 version_number=next_version,
                 content_hash=content_hash,
-                file=existing_version.file
+                file=existing_file_version.file
             )
         else:
-            latest_version = FileVersion.objects.filter(file_obj=file_obj).order_by("-version_number").first()
-            next_version = 1 if not latest_version else latest_version.version_number + 1
-
             serializer.save(
                 user=self.request.user,
                 file_obj=file_obj,

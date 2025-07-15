@@ -121,18 +121,48 @@ npm start
 
 ---
 
-## Testing
+## Content-Addressable Storage (CAS) and Deduplication
 
-### 1. Run all backend tests
+This application uses a content-addressable storage (CAS) approach for file versions:
+- Each uploaded file is hashed (SHA-256) and stored by its content hash.
+- If a file with the same content hash already exists, a new version is created that references the existing file (no duplicate storage on disk).
+- This ensures deduplication: identical files are stored only once, even if uploaded by different users or with different names.
+- You can fetch any file version by its content hash using the `/api/file_versions/by_hash/{content_hash}/` endpoint.
+
+---
+
+## File Upload Validation & Error Handling
+
+The API enforces strict validation rules for file uploads:
+- **File name**: Required, max 255 characters, cannot contain `/` or `\`.
+- **File**: Required, must not be empty, max size 10MB.
+- **Content hash**: Used for deduplication (see CAS above).
+- All validation errors return clear, user-friendly messages in English with HTTP 400 status.
+- Unexpected server errors return a generic message (never a traceback).
+
+Example error response:
+```json
+{
+  "file": ["File size must not exceed 10MB."]
+}
+```
+
+---
+
+## Testing (extended)
+
+- The test suite (pytest) covers:
+  - Happy-path uploads and versioning
+  - Upload of large files, empty files, and different file types
+  - Duplicate uploads (same content, same/different names)
+  - Edge cases: missing fields, invalid file names, oversized files
+  - User isolation and permissions
+  - Content hash deduplication (CAS behavior)
+- To run all tests:
 ```bash
 make test
 ```
-- Uses pytest and pytest-django
-- Tests cover: upload, versioning, hash, user isolation, permissions, and more
-
-### 2. Linting and formatting
-- Black, isort, flake8, mypy, and more are configured in `pyproject.toml`
-- Run linters as needed for code quality
+- All tests must pass before deployment.
 
 ---
 
