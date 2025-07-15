@@ -175,3 +175,84 @@ make test
 ---
 
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
+
+---
+
+## API Usage Examples
+
+### Authentication (obtain token)
+
+```bash
+curl -X POST http://localhost:8001/auth-token/ \
+  -d "username=user1@example.com" \
+  -d "password=user123"
+```
+**Response:**
+```json
+{"token": "<your_token_here>"}
+```
+
+Use this token in the `Authorization` header for all subsequent requests:
+```
+-H "Authorization: Token <your_token_here>"
+```
+
+---
+
+### List all file versions (for the authenticated user)
+```bash
+curl -X GET http://localhost:8001/api/file_versions/ \
+  -H "Authorization: Token <your_token_here>"
+```
+
+---
+
+### Upload a new file version
+```bash
+curl -X POST http://localhost:8001/api/file_versions/ \
+  -H "Authorization: Token <your_token_here>" \
+  -F "file=@/path/to/your/file.txt" \
+  -F "file_name=file.txt"
+```
+- `file_name` is optional; if omitted, the uploaded file's name will be used.
+
+---
+
+### Get details for a specific file version by ID
+```bash
+curl -X GET http://localhost:8001/api/file_versions/<id>/ \
+  -H "Authorization: Token <your_token_here>"
+```
+
+---
+
+### Get a file version by content hash
+```bash
+curl -X GET http://localhost:8001/api/file_versions/by_hash/<content_hash>/ \
+  -H "Authorization: Token <your_token_here>"
+```
+
+---
+
+### Get the latest or a specific version of a file by name
+
+- **Latest version:**
+```bash
+curl -X GET http://localhost:8001/api/<file_name> \
+  -H "Authorization: Token <your_token_here>"
+```
+
+- **Specific version (by revision number, zero-based):**
+```bash
+curl -X GET "http://localhost:8001/api/<file_name>?revision=1" \
+  -H "Authorization: Token <your_token_here>"
+```
+
+- If the file or revision does not exist, you will receive a 404 response.
+
+---
+
+### Notes
+- All endpoints require authentication (Token or Basic Auth).
+- Only the owner can access their files and versions.
+- For more details, see the code in `src/propylon_document_manager/file_versions/api/views.py`.
