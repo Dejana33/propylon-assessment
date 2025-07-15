@@ -228,19 +228,20 @@ def test_missing_file_field():
 
 @pytest.mark.django_db
 def test_missing_file_name():
-    """Test upload without file_name field."""
+    """Test upload without file_name uses uploaded file's name."""
     user = User.objects.create_user(email="test@example.com", password="test123")
     client = APIClient()
     client.force_authenticate(user=user)
 
-    uploaded_file = SimpleUploadedFile("test.txt", b"content", content_type="text/plain")
+    uploaded_file = SimpleUploadedFile("auto_name.txt", b"abc", content_type="text/plain")
     response = client.post(
         reverse("api:fileversion-list"),
-        {"file": uploaded_file},
+        {"file": uploaded_file}, 
         format="multipart"
     )
-    
-    assert response.status_code in [400, 500]
+
+    assert response.status_code == 201
+    assert response.data["file_obj"]["name"] == "auto_name.txt"
 
 @pytest.mark.django_db
 def test_empty_file_upload():
