@@ -10,10 +10,13 @@ class FileVersion(models.Model):
         related_name="versions"
     )
     version_number = models.IntegerField()
-    file = models.FileField(upload_to="uploads/", null=True, blank=True)
+    file = models.FileField(upload_to=settings.FILE_UPLOAD_DIR, null=True, blank=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="file_versions"
     )
-    content_hash = models.CharField(max_length=64, editable=False, db_index=True) 
+    content_hash = models.CharField(max_length=64, editable=False, db_index=True, unique=True)
+
+    class Meta:
+        unique_together = ['file_obj', 'version_number'] 

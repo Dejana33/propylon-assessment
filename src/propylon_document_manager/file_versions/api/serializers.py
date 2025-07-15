@@ -21,6 +21,23 @@ class FileVersionSerializer(serializers.ModelSerializer):
 
     def get_shareable_link(self, obj):
         request = self.context.get("request")
-        if obj.file:
+        if hasattr(obj, 'file') and obj.file:
             return request.build_absolute_uri(obj.file.url)
         return None
+
+    def validate(self, data):
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            file_name = request.data.get('file_name')
+            if not file_name:
+                raise serializers.ValidationError({"file_name": "File name is required."})
+            if len(file_name) > 255:
+                raise serializers.ValidationError({"file_name": "File name must be at most 255 characters."})
+            if '/' in file_name or '\\' in file_name:
+                raise serializers.ValidationError({"file_name": "File name cannot contain '/' or '\\'."})
+            uploaded_file = request.FILES.get('file')
+            if uploaded_file:
+                max_size = 10 * 1024 * 1024
+                if uploaded_file.size > max_size:
+                    raise serializers.ValidationError({"file": "File size must not exceed 10MB."})
+        return data
